@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@media (max-width: 520px) {
+    .input {
+        max-width: 400px;
+    }
+
+    .white,
+    .border,
+    .darkBorderBg,
+    .glow {
+        max-width: 400px !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .input {
+        max-width: 300px;
+    }
+
+    .white,
+    .border,
+    .darkBorderBg,
+    .glow {
+        max-width: 300px !important;
+    }
+    
+}

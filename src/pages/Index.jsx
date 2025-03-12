@@ -1,5 +1,6 @@
 import SearchBar from '../components/SearchBar';
 import Loader from '../components/Loader';
+import ErrorMessage from '../components/ErrorMessage';
 
 const Index = () => {
     return ( 
@@ -8,6 +9,7 @@ const Index = () => {
                 <SearchBar />
             </div>
             <Loader />
+            <ErrorMessage />
         </div>
      );
 }

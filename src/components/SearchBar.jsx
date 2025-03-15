@@ -1,43 +1,121 @@
-import React from 'react';
-import styled from 'styled-components';
+import { useState, useEffect } from "react";
+import styled from "styled-components";
+import StarshipTable from "../components/StarshipTable";
+import Loader from "./Loader";
+import ErrorMessage from "./ErrorMessage";
+import useStarships from "../hooks/useStarships";
 
 const SearchBar = () => {
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const fetchData = useStarships();
+
+  useEffect(() => {
+    if (query.length == 0) {
+      setSuggestions([]);
+      return;
+    }
+
+    const fetch_Star_ships = async () => {
+      setError("");
+      setSuggestions([]);
+      setLoading(true);
+      try {
+        const response = await fetchData(query);
+        if (!response) {
+          setError("An error occurred. Please try again later.");
+          setLoading(false);
+          return;
+        }
+        setError(response.data.count === 0 ? "No results found." : "");
+        setLoading(false);
+        setSuggestions(response.data.results);
+      } catch (error) {
+        setError("An error occurred. Please try again later.");
+        setLoading(false);
+        console.error("Error fetching star ships", error);
+      }
+    };
+
+    const debounceTimeout = setTimeout(fetch_Star_ships, 300);
+    return () => clearTimeout(debounceTimeout);
+  }, [query]);
+
   return (
-    <StyledWrapper1>
-      <div>
-        <div id="search-bar">
-          <div className="glow" />
-          <div className="darkBorderBg" />
-          <div className="darkBorderBg" />
-          <div className="darkBorderBg" />
-          <div className="white" />
-          <div className="border" />
-          <div id="main">
-            <input placeholder="Search..." type="text" name="text" className="input" />
-            <div id="input-mask" />
-            <div id="pink-mask" />
-            <div id="search-icon" className='cursor-pointer'>
-              <svg xmlns="http://www.w3.org/2000/svg" width={24} viewBox="0 0 24 24" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" height={24} fill="none" className="feather feather-search">
-                <circle stroke="url(#search)" r={8} cy={11} cx={11} />
-                <line stroke="url(#searchl)" y2="16.65" y1={22} x2="16.65" x1={22} />
-                <defs>
-                  <linearGradient gradientTransform="rotate(50)" id="search">
-                    <stop stopColor="#f8e7f8" offset="0%" />
-                    <stop stopColor="#b6a9b7" offset="50%" />
-                  </linearGradient>
-                  <linearGradient id="searchl">
-                    <stop stopColor="#b6a9b7" offset="0%" />
-                    <stop stopColor="#837484" offset="50%" />
-                  </linearGradient>
-                </defs>
-              </svg>
+    <>
+      <div className="gap-[10px] flex flex-col items-center justify-center">
+        <StyledWrapper1>
+          <div>
+            <div id="search-bar">
+              <div className="glow" />
+              <div className="darkBorderBg" />
+              <div className="darkBorderBg" />
+              <div className="darkBorderBg" />
+              <div className="white" />
+              <div className="border" />
+              <div id="main">
+                <input
+                  placeholder="Search..."
+                  type="text"
+                  name="text"
+                  className="input"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  autoComplete="off"
+                />
+                <div id="input-mask" />
+                <div id="pink-mask" />
+                <div id="search-icon" className="cursor-pointer">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                    height={24}
+                    fill="none"
+                    className="feather feather-search"
+                  >
+                    <circle stroke="url(#search)" r={8} cy={11} cx={11} />
+                    <line
+                      stroke="url(#searchl)"
+                      y2="16.65"
+                      y1={22}
+                      x2="16.65"
+                      x1={22}
+                    />
+                    <defs>
+                      <linearGradient
+                        gradientTransform="rotate(50)"
+                        id="search"
+                      >
+                        <stop stopColor="#f8e7f8" offset="0%" />
+                        <stop stopColor="#b6a9b7" offset="50%" />
+                      </linearGradient>
+                      <linearGradient id="searchl">
+                        <stop stopColor="#b6a9b7" offset="0%" />
+                        <stop stopColor="#837484" offset="50%" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
+        </StyledWrapper1>
+
+        <div className="suggestions">
+          {loading && <Loader />}
+          {error && <ErrorMessage message={error} />}
+          {suggestions.length > 0 && <StarshipTable data={suggestions} />}
         </div>
       </div>
-    </StyledWrapper1>
+    </>
   );
-}
+};
 
 const StyledWrapper1 = styled.div`
   .grid {
@@ -375,7 +453,8 @@ const StyledWrapper1 = styled.div`
   .border,
   .darkBorderBg,
   .glow {
-  max-width: 514px; 
-  }`;
+    max-width: 514px;
+  }
+`;
 
 export default SearchBar;

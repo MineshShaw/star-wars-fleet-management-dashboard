@@ -15,13 +15,17 @@ const SearchBar = () => {
   useEffect(() => {
     if (query.length == 0) {
       setSuggestions([]);
+      setError("");
+      setSuggestions([]);
       return;
     }
+
 
     const fetch_Star_ships = async () => {
       setError("");
       setSuggestions([]);
       setLoading(true);
+      
       try {
         const response = await fetchData(query);
         if (!response) {

@@ -5,23 +5,22 @@ import {
   getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
+import CompareModal from "./CompareModal";
 
 const StarshipTable = ({ data }) => {
   const [selectedRows, setSelectedRows] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const toggleSelection = (id) => {
+  const toggleSelection = (row) => {
     setSelectedRows((prev) => {
-      const selectedCount = Object.values(prev).filter(Boolean).length;
+      const newSelection = { ...prev };
 
-      if (prev[id]) {
-        const newSelection = { ...prev };
-        delete newSelection[id];
-        return newSelection;
-      } else if (selectedCount < 3) {
-        return { ...prev, [id]: true };
+      if (newSelection[row.original.name]) {
+        delete newSelection[row.original.name];
+      } else if (Object.keys(newSelection).length < 3) {
+        newSelection[row.original.name] = row.original;
       }
-
-      return prev;
+      return newSelection;
     });
   };
 
@@ -39,7 +38,7 @@ const StarshipTable = ({ data }) => {
             onMouseEnter={(e) => (e.target.style.cursor = "pointer")}
             onMouseLeave={(e) => (e.target.style.cursor = "default")}
             onClick={() => {
-              toggleSelection(row.original.name);
+              toggleSelection(row);
               console.log(selectedRows);
             }}
           >
@@ -64,7 +63,15 @@ const StarshipTable = ({ data }) => {
 
   return (
     <>
+      {isModalOpen && <CompareModal setIsModalOpen={setIsModalOpen} selectedRows={selectedRows}/>}
       <div className="h-[70%] p-4">
+        {Object.keys(selectedRows).length > 0 && 
+          <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Compare
+        </button>}
         <table className="min-w-full overflow-auto bg-black text-white border border-gray-700 rounded-lg">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
